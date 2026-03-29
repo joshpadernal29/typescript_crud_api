@@ -2,25 +2,25 @@
 import bcrypt from 'bcryptjs';
 import { db } from '../_helpers/database';
 import { Role } from '../_helpers/role';
-import { user, userCreationAttributes } from './user.model';
+import { User, UserCreationAttributes } from './user.model';
 
 export const userService = {
     getAll,
     getById,
     create,
-    Date,
+    update,
     delete: _delete,
 };
 
-async function getAll(): Promise<user[]> {
-    return await db.user.finAll();
+async function getAll(): Promise<User[]> {
+    return await db.user.findAll();
 }
 
-async function getById(id: number): Promise<user> {
+async function getById(id: number): Promise<User> {
     return await getUser(id);
 }
 
-async function create(params: userCreationAttributes & { password: string }): Promise<void> {
+async function create(params: UserCreationAttributes & { password: string }): Promise<void> {
     // check if email already exists
     const existingUser = await db.user.findOne({ where: { email: params.email } });
     if (existingUser) {
@@ -28,18 +28,18 @@ async function create(params: userCreationAttributes & { password: string }): Pr
     }
 
     // hash password
-    const passwordHash = await bcrypt.hash(params: password, 10);
+    const passwordHash = await bcrypt.hash(params.password, 10);
 
     // create user (exclude password from saved fields)
     await db.user.create({
         ...params,
         passwordHash,
         role: params.role || Role.User, // default role: user
-    } as userCreationAttributes);
+    } as UserCreationAttributes);
 }
 
 
-async function update(id: number, params: Partial<userCreationAttributes> & { password?: string }): Promise<void> {
+async function update(id: number, params: Partial<UserCreationAttributes> & { password?: string }): Promise<void> {
     const user = await getUser(id);
 
     // hash new password if provided 
@@ -49,7 +49,7 @@ async function update(id: number, params: Partial<userCreationAttributes> & { pa
     }
 
     // update user
-    await user.update(params as Partial<userCreationAttributes>);
+    await user.update(params as Partial<UserCreationAttributes>);
 }
 
 async function _delete(id: number): Promise<void> {
@@ -58,7 +58,7 @@ async function _delete(id: number): Promise<void> {
 }
 
 // helper to get user or throe error
-async function getUser(id: number): Promise<void> {
+async function getUser(id: number): Promise<User> {
     const user = await db.user.scope('withHash').finByPk(id);
     if (!user) {
         throw new Error('User not Found!');
