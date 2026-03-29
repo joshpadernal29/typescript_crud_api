@@ -9,7 +9,7 @@ export function validateRequest(
 ): void {
     const options = {
         abortEarly: false,
-        allowUnkown: true,
+        allowUnknown: true,
         stripUnknown: true,
     };
 

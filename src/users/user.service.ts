@@ -59,7 +59,7 @@ async function _delete(id: number): Promise<void> {
 
 // helper to get user or throe error
 async function getUser(id: number): Promise<User> {
-    const user = await db.user.scope('withHash').finByPk(id);
+    const user = await db.user.scope('withHash').findByPk(id);
     if (!user) {
         throw new Error('User not Found!');
     }
