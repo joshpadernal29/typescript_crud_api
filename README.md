@@ -24,16 +24,16 @@ npm run dev
 
 # API Endpoint Testing (PowerShell)
 # Create Record (POST)
-curl.exe --% -X POST http://localhost:4000/users -H "Content-Type: application/json" -d "{\"title\":\"Mr\",\"firstname\":\"Jane\",\"lastname\":\"Smith\",\"email\":\"jane@example.com\",\"password\":\"secret123\",\"confirmPassword\":\"secret123\",\"role\":\"User\"}"
+```curl.exe --% -X POST http://localhost:4000/users -H "Content-Type: application/json" -d "{\"title\":\"Mr\",\"firstname\":\"Jane\",\"lastname\":\"Smith\",\"email\":\"jane@example.com\",\"password\":\"secret123\",\"confirmPassword\":\"secret123\",\"role\":\"User\"}"
 
 # Retrieve All users (GET)
-curl.exe http://localhost:4000/users
+```curl.exe http://localhost:4000/users
 
 # Retrieve by ID (GET)
-curl.exe http://localhost:4000/users/1
+```curl.exe http://localhost:4000/users/1
 
 # Update user (PUT)
-curl.exe --% -X PUT http://localhost:4000/users/1 -H "Content-Type: application/json" -d "{\"firstname\":\"Janet\",\"password\":\"newsecret456\",\"confirmPassword\":\"newsecret456\"}"
+```curl.exe --% -X PUT http://localhost:4000/users/1 -H "Content-Type: application/json" -d "{\"firstname\":\"Janet\",\"password\":\"newsecret456\",\"confirmPassword\":\"newsecret456\"}"
 
 # Remove user (DELETE)
-curl.exe -X DELETE http://localhost:4000/users/1
+```curl.exe -X DELETE http://localhost:4000/users/1
