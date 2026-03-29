@@ -1,7 +1,7 @@
 // src/_middleware/erroHandler.ts
 import type { Request, Response, NextFunction } from "express";
 
-export function erroHandler(
+export function errorHandler(
     err: Error | string,
     req: Request,
     res: Response,
