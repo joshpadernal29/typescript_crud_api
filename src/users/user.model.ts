@@ -17,10 +17,10 @@ export interface UserAttributes {
 }
 
 // define optional attributes for creation (adding ! non-null assertion operator)
-export interface userCreationAttributes extends Optional<UserAttributes, 'id' | 'createdAt' | 'updatedAt'> { }
+export interface UserCreationAttributes extends Optional<UserAttributes, 'id' | 'createdAt' | 'updatedAt'> { }
 
 // define sequelize model class
-export class user extends Model<UserAttributes, userCreationAttributes> implements UserAttributes {
+export class User extends Model<UserAttributes, UserCreationAttributes> implements UserAttributes {
     public id!: number;
     public email!: string;
     public passwordHash!: string;
@@ -33,8 +33,8 @@ export class user extends Model<UserAttributes, userCreationAttributes> implemen
 }
 
 // export model initializer function
-export default function (sequelize: Sequelize): typeof user {
-    user.init(
+export default function (sequelize: Sequelize): typeof User {
+    User.init(
         {
             id: {
                 type: DataTypes.INTEGER,
@@ -94,5 +94,5 @@ export default function (sequelize: Sequelize): typeof user {
         }
     );
 
-    return user;
+    return User;
 }
