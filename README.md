@@ -23,17 +23,17 @@ A high-performance, strictly-typed Backend API built with **Node.js** and **Expr
 npm run dev
 
 # API Endpoint Testing (PowerShell)
-# Create Record (POST)
+***Create Record (POST)***
 ```curl.exe --% -X POST http://localhost:4000/users -H "Content-Type: application/json" -d "{\"title\":\"Mr\",\"firstname\":\"Jane\",\"lastname\":\"Smith\",\"email\":\"jane@example.com\",\"password\":\"secret123\",\"confirmPassword\":\"secret123\",\"role\":\"User\"}"
 
-# Retrieve All users (GET)
+***Retrieve All users (GET)***
 ```curl.exe http://localhost:4000/users
 
-# Retrieve by ID (GET)
+***Retrieve by ID (GET)***
 ```curl.exe http://localhost:4000/users/1
 
-# Update user (PUT)
+***Update user (PUT)***
 ```curl.exe --% -X PUT http://localhost:4000/users/1 -H "Content-Type: application/json" -d "{\"firstname\":\"Janet\",\"password\":\"newsecret456\",\"confirmPassword\":\"newsecret456\"}"
 
-# Remove user (DELETE)
+***Remove user (DELETE)***
 ```curl.exe -X DELETE http://localhost:4000/users/1
