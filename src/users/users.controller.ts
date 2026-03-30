@@ -19,37 +19,42 @@ export default router;
 
 
 // route handles (typed)
+// get all users
 function getAll(req: Request, res: Response, next: NextFunction): void {
     userService.getAll()
         .then((users) => res.json(users))
         .catch(next);
 }
 
+// get user by id
 function getById(req: Request, res: Response, next: NextFunction): void {
     userService.getById(Number(req.params.id))
         .then((user) => res.json(user))
         .catch(next);
 }
 
+// create new user
 function create(req: Request, res: Response, next: NextFunction): void {
     userService.create(req.body)
         .then(() => res.json({ message: 'User created' }))
         .catch(next);
 }
 
+// update user
 function update(req: Request, res: Response, next: NextFunction): void {
     userService.update(Number(req.params.id), req.body)
         .then(() => res.json({ message: 'User updated' }))
         .catch(next);
 }
 
+// delete user
 function _delete(req: Request, res: Response, next: NextFunction): void {
     userService.delete(Number(req.params.id))
         .then(() => res.json({ message: 'User deleted' }))
         .catch(next);
 }
 
-// validation schemas
+// validation schemas (for form validations)
 function createSchema(req: Request, res: Response, next: NextFunction): void {
     const schema = Joi.object({
         title: Joi.string().required(),

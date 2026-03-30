@@ -12,14 +12,17 @@ export const userService = {
     delete: _delete,
 };
 
+// get all
 async function getAll(): Promise<User[]> {
     return await db.user.findAll();
 }
 
+// get user by id
 async function getById(id: number): Promise<User> {
     return await getUser(id);
 }
 
+// create user
 async function create(params: UserCreationAttributes & { password: string }): Promise<void> {
     // check if email already exists
     const existingUser = await db.user.findOne({ where: { email: params.email } });
@@ -38,7 +41,7 @@ async function create(params: UserCreationAttributes & { password: string }): Pr
     } as UserCreationAttributes);
 }
 
-
+// update user
 async function update(id: number, params: Partial<UserCreationAttributes> & { password?: string }): Promise<void> {
     const user = await getUser(id);
 
@@ -52,6 +55,7 @@ async function update(id: number, params: Partial<UserCreationAttributes> & { pa
     await user.update(params as Partial<UserCreationAttributes>);
 }
 
+// delete user
 async function _delete(id: number): Promise<void> {
     const user = await getUser(id);
     await user.destroy();

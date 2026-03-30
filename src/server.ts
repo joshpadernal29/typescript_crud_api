@@ -12,7 +12,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cors());
 
-// Api Routes
+// Api Routes (refer to the users.controller.ts for routing /users)
 app.use('/users', userController);
 
 // global errorhandler
