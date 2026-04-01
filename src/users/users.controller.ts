@@ -9,7 +9,7 @@ import { userService } from './user.service';
 const router = Router();
 
 // routes
-router.post('/authenticate', authenticateSchema, authenticate); // for user login
+router.post('/authenticate', authenticateSchema, authenticate); // user login
 router.get('/', getAll);
 router.get('/:id', getById);
 router.post('/', createSchema, create);
@@ -82,15 +82,15 @@ function updateSchema(req: Request, res: Response, next: NextFunction): void {
     validateRequest(req, next, schema);
 }
 
-// This is for user login
-function authenticate(req: any, res: any, next: any) {
+// Route handler for login
+function authenticate(req: Request, res: Response, next: NextFunction): void {
     userService.authenticate(req.body)
         .then(user => res.json(user))
         .catch(next);
 }
 
-// Add this to your Joi schemas at the bottom of the controller
-function authenticateSchema(req: any, res: any, next: any) {
+// Joi validation for login
+function authenticateSchema(req: Request, res: Response, next: NextFunction): void {
     const schema = Joi.object({
         email: Joi.string().required(),
         password: Joi.string().required()
