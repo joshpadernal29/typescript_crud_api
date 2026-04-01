@@ -187,10 +187,12 @@ async function loadAccounts() {
 
 // Add Account from Modal
 async function addAccount(event) {
+    // 1. Stop the page from reloading
     event.preventDefault();
 
+    // 2. Collect Data
     const payload = {
-        title: 'Mr',
+        title: document.getElementById('accTitle').value,
         firstname: document.getElementById('accFname').value,
         lastname: document.getElementById('accLname').value,
         email: document.getElementById('accEmail').value,
@@ -206,16 +208,38 @@ async function addAccount(event) {
             body: JSON.stringify(payload)
         });
 
+        // 3. Check if the Server responded with Success (200-299)
         if (res.ok) {
-            bootstrap.Modal.getInstance(document.getElementById('account-modal')).hide();
-            loadAccounts();
-            document.getElementById('accountForm').reset();
+            // SAFE MODAL HIDING: 
+            // Check if the element exists before calling Bootstrap to prevent "Server Error" alert
+            const modalElement = document.getElementById('account-modal');
+            if (modalElement) {
+                const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
+                modalInstance.hide();
+            }
+
+            // SAFE FORM RESET:
+            const formElement = document.getElementById('accountForm');
+            if (formElement) {
+                formElement.reset();
+            }
+
+            // Refresh the table data
+            await loadAccounts();
+
+            alert("User created and UI updated successfully.");
         } else {
+            // Server returned an error (e.g., 400 Bad Request)
             const err = await res.json();
-            alert(err.message);
+            alert(`Registration Failed: ${err.message}`);
         }
+
     } catch (e) {
-        alert("Server Error");
+        // This only runs if there is a Network error OR a JS crash in the try block
+        console.error("Critical Error:", e);
+
+        // Show the REAL error message so you can fix it
+        alert("System Error: " + e.message);
     }
 }
 
