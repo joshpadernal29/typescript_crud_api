@@ -76,7 +76,7 @@ async function login(event) {
             localStorage.setItem('user', JSON.stringify(result));
             checkAuth();
             alert(`Welcome, ${result.firstname}!`);
-            window.location.hash = '#/';
+            window.location.hash = '#/userProfile';
         } else {
             // This shows "Invalid Email or Password" from your Service
             alert(result.message);
@@ -141,27 +141,47 @@ function logout() {
 // --- 3. ADMIN CRUD (ACCOUNTS) ---
 
 async function loadAccounts() {
-    if (!document.body.classList.contains('is-admin')) return;
-
     const tbody = document.getElementById('account-table-body');
+    if (!tbody) return;
+
+    // Clear the table and show a loading state
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading users...</td></tr>';
+
     try {
         const response = await fetch(`${API_URL}/users`);
+
+        if (!response.ok) throw new Error("Failed to fetch users");
+
         const users = await response.json();
 
+        // Map through the users and create table rows
         tbody.innerHTML = users.map(u => `
             <tr>
                 <td>${u.id}</td>
+                <td>
+                    <div class="fw-bold">${u.title}. ${u.lastname}</div>
+                    <small class="text-muted">${u.firstname}</small>
+                </td>
                 <td>${u.email}</td>
-                <td><span class="badge ${u.role === 'Admin' ? 'bg-danger' : 'bg-primary'}">${u.role}</span></td>
-                <td><span class="text-success">Yes</span></td>
+                <td>
+                    <span class="badge ${u.role === 'Admin' ? 'bg-danger' : 'bg-primary'}">
+                        ${u.role}
+                    </span>
+                </td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary" onclick="editAccount(${u.id})">Edit</button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteAccount(${u.id})">Delete</button>
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editUser(${u.id})">
+                        <i class="bi bi-pencil"></i> Edit
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${u.id})">
+                        <i class="bi bi-trash"></i> Delete
+                    </button>
                 </td>
             </tr>
         `).join('');
+
     } catch (err) {
-        tbody.innerHTML = '<tr><td colspan="5" class="text-center">Error connecting to API</td></tr>';
+        console.error("Load Accounts Error:", err);
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center text-danger">Error: ${err.message}</td></tr>`;
     }
 }
 
