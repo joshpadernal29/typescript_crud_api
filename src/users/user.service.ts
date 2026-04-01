@@ -5,12 +5,29 @@ import { Role } from '../_helpers/role';
 import { User, UserCreationAttributes } from './user.model';
 
 export const userService = {
+    authenticate, // for login
     getAll,
     getById,
     create,
     update,
     delete: _delete,
 };
+
+// for user login
+async function authenticate({ email, password }: any) {
+    // 1. Find user and include the password hash (using the 'withHash' scope)
+    const user = await db.user.scope('withHash').findOne({ where: { email } });
+
+    // 2. Compare passwords using bcrypt
+    // user.passwordHash comes from your DB, password comes from the login form
+    if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
+        throw new Error('Invalid Email or Password');
+    }
+
+    // 3. Remove passwordHash from the object before sending it to the frontend
+    const { passwordHash, ...userWithoutHash } = user.get();
+    return userWithoutHash;
+}
 
 // get all
 async function getAll(): Promise<User[]> {
