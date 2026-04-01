@@ -26,6 +26,7 @@ initialize()
         app.listen(PORT, () => {
             console.log(`Server running at http://localhost:${PORT}`);
             console.log('TEST WITH: POST /users with {email,password...}');
+            console.log('USE admin@test.com password: admin123  FOR TESTING...');
         });
     })
     .catch((err) => {
