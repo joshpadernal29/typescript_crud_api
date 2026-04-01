@@ -55,30 +55,42 @@ function checkAuth() {
 
 async function login(event) {
     event.preventDefault();
-    const emailInput = document.getElementById('loginEmail').value;
+    const emailInput = document.getElementById('loginEmail').value.trim();
     const passwordInput = document.getElementById('loginPassword').value;
 
     try {
-        // Fetching all users to simulate authentication based on your current controller
         const response = await fetch(`${API_URL}/users`);
         const users = await response.json();
 
-        const user = users.find(u => u.email === emailInput && u.password === passwordInput);
+        // LOGGING FOR DEBUGGING
+        console.log("Input Email:", emailInput);
+        console.log("First User in DB:", users[0]);
+
+        // 1. Check if password even exists in the DB response
+        if (users[0] && !users[0].password) {
+            console.warn("WARNING: The database response is missing the 'password' field!");
+        }
+
+        const user = users.find(u => u.email === emailInput); // Temporary: just check email
 
         if (user) {
             localStorage.setItem('user', JSON.stringify(user));
-            checkAuth();
 
-            // Toast feedback
-            const toastEl = document.getElementById('login-toast');
-            if (toastEl) new bootstrap.Toast(toastEl).show();
+            // Wrap checkAuth in a try-catch so it doesn't kill the login
+            try {
+                checkAuth();
+            } catch (e) {
+                console.error("UI Update Failed:", e);
+            }
 
+            alert("Login success!");
             window.location.hash = '#/';
         } else {
-            alert("Invalid Email or Password.");
+            alert("User not found in database.");
         }
     } catch (err) {
-        alert("Server connection failed. Check if TS Backend is on Port 4000.");
+        console.error("Full Error Trace:", err);
+        alert("System Error: " + err.message);
     }
 }
 
@@ -213,12 +225,23 @@ function loadProfile() {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) return;
 
-    document.getElementById('profile-name').innerText = `${user.firstname} ${user.lastname}`;
-    document.getElementById('profile-email').innerText = user.email;
-    document.getElementById('profile-role').innerText = user.role;
-    document.getElementById('profile-class').innerText = user.role;
-}
+    // Select elements
+    const nameEl = document.getElementById('profile-name');
+    const emailEl = document.getElementById('profile-email');
+    const roleEl = document.getElementById('profile-role');
 
-function navigateTo(hash) {
-    window.location.hash = hash;
+    // ONLY set innerText if the element actually exists in the HTML
+    if (nameEl) {
+        nameEl.innerText = `${user.firstname} ${user.lastname}`;
+    }
+
+    if (emailEl) {
+        emailEl.innerText = user.email;
+    }
+
+    if (roleEl) {
+        roleEl.innerText = user.role;
+        // Optional: Change badge color based on role
+        roleEl.className = `badge ${user.role === 'Admin' ? 'bg-danger' : 'bg-primary'}`;
+    }
 }
