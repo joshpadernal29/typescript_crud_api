@@ -86,6 +86,7 @@ async function login(event) {
     }
 }
 
+// register new Account
 async function registration(event) {
     event.preventDefault();
 
@@ -132,6 +133,7 @@ async function registration(event) {
     }
 }
 
+// account logout
 function logout() {
     localStorage.removeItem('user');
     window.location.hash = '#/login';
@@ -169,7 +171,7 @@ async function loadAccounts() {
                     </span>
                 </td>
                 <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="editUser(${u.id})">
+                    <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditModal(${u.id})">
                         <i class="bi bi-pencil"></i> Edit
                     </button>
                     <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${u.id})">
@@ -265,6 +267,7 @@ async function deleteUser(id) {
     }
 }
 
+// load user profile
 function loadProfile() {
     const user = JSON.parse(localStorage.getItem('user'));
     if (!user) return;
@@ -287,5 +290,76 @@ function loadProfile() {
         roleEl.innerText = user.role;
         // Optional: Change badge color based on role
         roleEl.className = `badge ${user.role === 'Admin' ? 'bg-danger' : 'bg-primary'}`;
+    }
+}
+
+// edit user account via Admin
+async function openEditModal(id) {
+    try {
+        // 1. Fetch data from your backend
+        const res = await fetch(`${API_URL}/users/${id}`);
+        if (!res.ok) throw new Error("User not found");
+
+        const user = await res.json();
+
+        // 2. Populate the specific inputs in the edit-modal
+        // Ensure these IDs match your <input id="..."> exactly
+        document.getElementById('editId').value = user.id;
+        document.getElementById('editTitle').value = user.title;
+        document.getElementById('editFname').value = user.firstname;
+        document.getElementById('editLname').value = user.lastname;
+        document.getElementById('editEmail').value = user.email;
+        document.getElementById('editRole').value = user.role;
+
+        // 3. Manually trigger the modal to open AFTER data is loaded
+        const editModal = new bootstrap.Modal(document.getElementById('edit-modal'));
+        editModal.show();
+
+    } catch (e) {
+        console.error("Edit Modal Error:", e);
+        alert("Could not load user data: " + e.message);
+    }
+}
+// saves updated user info to the db
+async function saveUpdatedAccount(event) {
+    // 1. Prevent the page from refreshing
+    event.preventDefault();
+
+    // 2. Get the ID from the hidden input we filled earlier
+    const id = document.getElementById('editId').value;
+
+    // 3. Build the payload with the current input values
+    const payload = {
+        title: document.getElementById('editTitle').value,
+        firstname: document.getElementById('editFname').value,
+        lastname: document.getElementById('editLname').value,
+        email: document.getElementById('editEmail').value,
+        role: document.getElementById('editRole').value,
+    };
+
+    try {
+        // 4. Send the PUT request to the backend
+        const res = await fetch(`${API_URL}/users/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (res.ok) {
+            // 5. Success! Hide the modal
+            const editModalElement = document.getElementById('edit-modal');
+            const modalInstance = bootstrap.Modal.getInstance(editModalElement);
+            modalInstance.hide();
+
+            // 6. Refresh the table to show the new data
+            alert("Account updated successfully!");
+            loadAccounts();
+        } else {
+            const err = await res.json();
+            alert("Update Failed: " + err.message);
+        }
+    } catch (e) {
+        console.error("Update Error:", e);
+        alert("System Error: " + e.message);
     }
 }

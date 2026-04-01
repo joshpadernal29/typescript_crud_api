@@ -92,7 +92,7 @@
                 </div>
             </div>
         </section>
-
+        <!--LOGIN SECTION-->
         <section id="login-page" class="page">
             <div class="card shadow-sm mx-auto" style="max-width: 400px;">
                 <div class="card-body">
@@ -115,7 +115,7 @@
                 </div>
             </div>
         </section>
-
+        <!--ACOUNTS SECTION-->
         <section id="accounts" class="page">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h3>User Accounts</h3>
@@ -127,6 +127,7 @@
                     <thead class="table-dark">
                         <tr>
                             <th>ID</th>
+                            <th>Full Name</th>
                             <th>Email</th>
                             <th>Role</th>
                             <th class="text-center">Actions</th>
@@ -150,6 +151,7 @@
         </section>
     </main>
 
+    <!--add acount modal-->
     <div class="modal fade" id="addUserModal" tabindex="-1">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -201,6 +203,56 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-primary" onclick="addAccount(event)">Add Account</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!--edit account modal-->
+    <div class="modal fade" id="edit-modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Edit User Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editForm" onsubmit="updateAccount(event)">
+                    <div class="modal-body">
+                        <input type="hidden" id="editId">
+
+                        <div class="mb-3">
+                            <label class="form-label">Title</label>
+                            <select id="editTitle" class="form-select">
+                                <option value="Mr">Mr</option>
+                                <option value="Ms">Ms</option>
+                                <option value="Mrs">Mrs</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">First Name</label>
+                            <input type="text" id="editFname" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Last Name</label>
+                            <input type="text" id="editLname" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email</label>
+                            <input type="email" id="editEmail" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Role</label>
+                            <select id="editRole" class="form-select">
+                                <option value="User">User</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" onclick="saveUpdatedAccount(event)">Save
+                            Changes</button>
                     </div>
                 </form>
             </div>
