@@ -53,44 +53,36 @@ function checkAuth() {
     }
 }
 
+// User Login
 async function login(event) {
     event.preventDefault();
-    const emailInput = document.getElementById('loginEmail').value.trim();
-    const passwordInput = document.getElementById('loginPassword').value;
+
+    const data = {
+        email: document.getElementById('loginEmail').value,
+        password: document.getElementById('loginPassword').value
+    };
 
     try {
-        const response = await fetch(`${API_URL}/users`);
-        const users = await response.json();
+        const response = await fetch(`${API_URL}/users/authenticate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
 
-        // LOGGING FOR DEBUGGING
-        console.log("Input Email:", emailInput);
-        console.log("First User in DB:", users[0]);
+        const result = await response.json();
 
-        // 1. Check if password even exists in the DB response
-        if (users[0] && !users[0].password) {
-            console.warn("WARNING: The database response is missing the 'password' field!");
-        }
-
-        const user = users.find(u => u.email === emailInput); // Temporary: just check email
-
-        if (user) {
-            localStorage.setItem('user', JSON.stringify(user));
-
-            // Wrap checkAuth in a try-catch so it doesn't kill the login
-            try {
-                checkAuth();
-            } catch (e) {
-                console.error("UI Update Failed:", e);
-            }
-
-            alert("Login success!");
+        if (response.ok) {
+            // Result is the user object (without the hash)
+            localStorage.setItem('user', JSON.stringify(result));
+            checkAuth();
+            alert(`Welcome, ${result.firstname}!`);
             window.location.hash = '#/';
         } else {
-            alert("User not found in database.");
+            // This shows "Invalid Email or Password" from your Service
+            alert(result.message);
         }
     } catch (err) {
-        console.error("Full Error Trace:", err);
-        alert("System Error: " + err.message);
+        alert("Server connection failed.");
     }
 }
 
