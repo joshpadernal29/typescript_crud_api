@@ -55,10 +55,20 @@
             <div class="card shadow-sm mx-auto" style="max-width: 500px;">
                 <div class="card-body">
                     <h3>Create Account</h3>
-                    <form onsubmit="registration(event)">
-                        <div class="mb-3">
-                            <label class="form-label">First Name</label>
-                            <input type="text" class="form-control" id="fname" required>
+                    <form id="registerForm" onsubmit="registration(event)">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Title</label>
+                                <select class="form-select" id="title" required>
+                                    <option value="Mr">Mr</option>
+                                    <option value="Ms">Ms</option>
+                                    <option value="Mrs">Mrs</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8 mb-3">
+                                <label class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="fname" required>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Last Name</label>
@@ -69,8 +79,12 @@
                             <input type="email" class="form-control" id="email" required>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" required>
+                            <label class="form-label">Password (Min 6 chars)</label>
+                            <input type="password" class="form-control" id="password" minlength="6" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Confirm Password</label>
+                            <input type="password" class="form-control" id="confirmPassword" required>
                         </div>
                         <button type="submit" class="btn btn-success w-100">Sign Up</button>
                     </form>
@@ -82,7 +96,7 @@
             <div class="card shadow-sm mx-auto" style="max-width: 400px;">
                 <div class="card-body">
                     <h3>Login</h3>
-                    <form onsubmit="login(event)">
+                    <form id="loginForm" onsubmit="login(event)">
                         <div class="mb-3">
                             <label>Email</label>
                             <input type="email" class="form-control" id="loginEmail" required>
