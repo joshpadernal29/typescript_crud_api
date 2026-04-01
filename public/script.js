@@ -219,17 +219,25 @@ async function addAccount(event) {
     }
 }
 
-async function deleteAccount(id) {
-    const currentUser = JSON.parse(localStorage.getItem('user'));
-    if (currentUser.id === id) return alert("You cannot delete yourself!");
-
-    if (!confirm("Are you sure you want to delete this account?")) return;
+// delete account using the typescript_crud_api
+async function deleteUser(id) {
+    // 1. Safety first - always ask before deleting from DB
+    if (!confirm(`Are you sure you want to delete User ID: ${id}?`)) return;
 
     try {
-        await fetch(`${API_URL}/users/${id}`, { method: 'DELETE' });
-        loadAccounts();
+        const response = await fetch(`${API_URL}/users/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (response.ok) {
+            alert("User removed from database.");
+            loadAccounts(); // <--- Refresh the table automatically
+        } else {
+            const err = await response.json();
+            alert("Delete failed: " + err.message);
+        }
     } catch (err) {
-        alert("Delete failed.");
+        console.error("Delete Error:", err);
     }
 }
 
