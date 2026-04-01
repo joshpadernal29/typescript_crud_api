@@ -85,16 +85,26 @@ async function login(event) {
 async function registration(event) {
     event.preventDefault();
 
-    // MATCHES YOUR JOI createSchema EXACTLY
     const userData = {
-        title: 'Mr', // Default title as required by your Joi schema
+        // This line now grabs the actual selection from the dropdown
+        title: document.getElementById('title').value,
+
         firstname: document.getElementById('fname').value,
         lastname: document.getElementById('lname').value,
         email: document.getElementById('email').value,
         password: document.getElementById('password').value,
-        confirmPassword: document.getElementById('password').value, // Required by Joi
+        confirmPassword: document.getElementById('confirmPassword').value,
         role: 'User'
     };
+
+    // Quick validation before sending to the Joi schema
+    if (!userData.title) {
+        return alert("Please select a title.");
+    }
+
+    if (userData.password !== userData.confirmPassword) {
+        return alert("Passwords do not match!");
+    }
 
     try {
         const response = await fetch(`${API_URL}/users`, {
@@ -106,14 +116,15 @@ async function registration(event) {
         const result = await response.json();
 
         if (response.ok) {
-            document.getElementById('showEmail').innerText = userData.email;
-            window.location.hash = '#/verify-email';
+            alert(`Account created for ${userData.title} ${userData.lastname}!`);
+            window.location.hash = '#/login';
         } else {
-            // This shows the Joi validation error message from your validateRequest middleware
-            alert("Registration Failed: " + (result.message || "Invalid Data"));
+            // This will display Joi errors (e.g., "title is required")
+            alert("Validation Error: " + result.message);
         }
     } catch (err) {
-        alert("Cannot connect to server.");
+        console.error("Connection Error:", err);
+        alert("Server is unreachable. Check Port 4000.");
     }
 }
 
