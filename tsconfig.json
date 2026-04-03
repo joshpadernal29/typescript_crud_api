@@ -26,7 +26,7 @@
         "users/*"
       ]
     },
-    /* Keeping these off to match instructor's image */
+    "ignoreDeprecations": "6.0", // to silence baseUrlDeprecation error
     "verbatimModuleSyntax": false,
     /* These were in your text but NOT the image - commenting them out */
     // "noUncheckedIndexedAccess": true,
