@@ -1,6 +1,6 @@
 # Typescript_crud_api
 
-An integrated **Fullstack Web Application** consisting of a **TypeScript Express CRUD API** and a **Vanilla JS Frontend SPA**. This project implements Role-Based Access Control (RBAC), database persistence with Sequelize.
+An integrated **Fullstack Web Application** consisting of a **TypeScript Express CRUD API** and a **Vanilla JS Frontend SPA For Testing the crud_api**. This project implements Role-Based Access Control (RBAC), database persistence with Sequelize.
 
 ---
 
@@ -21,28 +21,27 @@ root/
 ├── config.json             # Database & JWT Credentials
 ├── tsconfig.json           # TS Compiler Settings
 └── package.json            # Dependencies & Scripts
-├── config.json             # Database & JWT Credentials
-├── tsconfig.json           # TS Compiler Settings
-└── package.json            # Dependencies & Scripts
-```text
+```
 
 # 🚀 Getting Started
-1. Backend Setup (API)
+# 1. Backend Setup (API)
 The backend handles data persistence, password hashing with bcryptjs, and JWT-based security.
 
 Install Dependencies:
-```Bash
+```bash
 npm install
-Database Configuration:
+```
+# Database Configuration:
 Ensure your MySQL server is running and update config.json with your credentials.
 
 Run the Server:
 
-Bash
+```bash
 npm run dev
-The API will be live at http://localhost:4000.
 ```
-2. Frontend Setup (UI)
+The API will be live at http://localhost:4000.
+
+# 2. Frontend Setup (UI)
 The frontend is a lightweight SPA using Hash Routing and Bootstrap 5.
 
 Launch via Live Server:
@@ -69,29 +68,29 @@ Global Error Handling: Custom middleware to format errors into consistent JSON r
 # 🧪 API Endpoint Testing (PowerShell)
 Account Management
 # Create Record (POST)
-```Powershell
+```powershell
 curl.exe --% -X POST http://localhost:4000/users -H "Content-Type: application/json" -d "{\"title\":\"Mr\",\"firstname\":\"Jane\",\"lastname\":\"Smith\",\"email\":\"jane@example.com\",\"password\":\"secret123\",\"confirmPassword\":\"secret123\",\"role\":\"User\"}"
 ```
 
 # Retrieve All Users (GET)
-```Powershell
+```powershell
 curl.exe http://localhost:4000/users
 ```
 # Retrieve by ID (GET)
-```Powershell
+```powershell
 curl.exe http://localhost:4000/users/1
 ```
 
 # Update User (PUT)
-```Powershell
+```powershell
 curl.exe --% -X PUT http://localhost:4000/users/1 -H "Content-Type: application/json" -d "{\"firstname\":\"Janet\",\"password\":\"newsecret456\",\"confirmPassword\":\"newsecret456\"}"
 ```
 
 # Remove User (DELETE)
-```Powershell
+```powershell
 curl.exe -X DELETE http://localhost:4000/users/1
 ```
 ---
 # Developed by: Josh Efraim C. Padernal
 For INTPROG Lab 5 Activity
----
+
