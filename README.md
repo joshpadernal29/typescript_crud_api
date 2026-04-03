@@ -1,44 +1,101 @@
-# TypeScript Express CRUD API
+# Typescript_crud_api
 
-A high-performance, strictly-typed Backend API built with **Node.js** and **Express**. This project implements a full CRUD lifecycle using **Sequelize ORM** with a **MySQL** database, focusing on type safety and robust data validation.
-
-## 🚀 Technical Features
-- **Strict Typing**: Developed with TypeScript to catch naming inconsistencies and syntax errors at compile time.
-- **ORM Integration**: Uses Sequelize for structured database interactions and schema management.
-- **Data Validation**: Centralized validation middleware using **Joi** to ensure data integrity.
-- **Security**: Industry-standard password hashing via `bcryptjs`.
-- **Global Error Handling**: Custom middleware to catch and format errors into consistent JSON responses.
+An integrated **Fullstack Web Application** consisting of a **TypeScript Express CRUD API** and a **Vanilla JS Frontend SPA For Testing the crud_api**. This project implements Role-Based Access Control (RBAC), database persistence with Sequelize.
 
 ---
 
-## 📦 Project Setup
+## 📂 Project Structure
 
-1. **Clone and Install**
-   ```bash
-   git clone <your-repo-url>
-   cd typescript_crud_api
-   npm install
-   
-# Run with auto-reload using ts-node-dev
+```text
+root/
+├── public/                 # Frontend (Vanilla JS, Bootstrap, CSS)
+│   ├── index.html          # Single Page Application entry
+│   ├── script.js           # Frontend Logic & API Fetching
+│   └── style.css           # Custom Styling
+├── src/                    # Backend (TypeScript & Express)
+│   ├── _helpers/           # DB Config, Sequelize Models, RBAC Roles
+│   ├── _middleware/        # Auth, Error Handling, Joi Validation
+│   ├── users/              # User/Account Module (Controllers & Services)
+│   ├── requests/           # Request Module (Planned)
+│   └── server.ts           # Express App Entry Point
+├── config.json             # Database & JWT Credentials
+├── tsconfig.json           # TS Compiler Settings
+└── package.json            # Dependencies & Scripts
+```
+
+# 🚀 Getting Started
+# 1. Backend Setup (API)
+The backend handles data persistence, password hashing with bcryptjs, and JWT-based security.
+Install Dependencies:
+**Install runtime dependencies**
+```bash
+npm install express mysql2 sequelize bcryptjs jsonwebtoken cors joi rootpath
+```
+** Install TypeScript + dev dependencies**
+```bash
+npm install --save-dev typescript ts-node @types/node @types/express @types/cors @types/bcryptjs @types/jsonwebtoken nodemon
+```
+
+# Database Configuration:
+Ensure your MySQL server is running and update config.json with your credentials.
+
+Run the Server:
+
+```bash
 npm run dev
+```
+The API will be live at http://localhost:4000.
 
-# API Endpoint Testing (PowerShell)
-***Create Record (POST)***
-```bash
+# 2. Frontend Setup (UI)
+The frontend is a lightweight SPA using Hash Routing and Bootstrap 5.
+
+Launch via Live Server:
+
+Open the public/index.html file in VS Code.
+
+Right-click and select "Open with Live Server".
+
+Access:
+
+Typically available at http://127.0.0.1:5500/public/index.html.
+
+# 🛠 Technical Features
+Strict Typing: Developed with TypeScript to catch naming inconsistencies and syntax errors at compile time.
+
+ORM Integration: Uses Sequelize for structured database interactions and schema management.
+
+Data Validation: Centralized validation middleware using Joi to ensure data integrity.
+
+Security: Industry-standard password hashing via bcryptjs and JWT authentication.
+
+Global Error Handling: Custom middleware to format errors into consistent JSON responses.
+
+# 🧪 API Endpoint Testing (PowerShell) using cURL
+Account Management
+# Create Record (POST)
+```powershell
 curl.exe --% -X POST http://localhost:4000/users -H "Content-Type: application/json" -d "{\"title\":\"Mr\",\"firstname\":\"Jane\",\"lastname\":\"Smith\",\"email\":\"jane@example.com\",\"password\":\"secret123\",\"confirmPassword\":\"secret123\",\"role\":\"User\"}"
+```
 
-***Retrieve All users (GET)***
-```bash
+# Retrieve All Users (GET)
+```powershell
 curl.exe http://localhost:4000/users
-
-***Retrieve by ID (GET)***
-```bash
+```
+# Retrieve by ID (GET)
+```powershell
 curl.exe http://localhost:4000/users/1
+```
 
-***Update user (PUT)***
-```bash
+# Update User (PUT)
+```powershell
 curl.exe --% -X PUT http://localhost:4000/users/1 -H "Content-Type: application/json" -d "{\"firstname\":\"Janet\",\"password\":\"newsecret456\",\"confirmPassword\":\"newsecret456\"}"
+```
 
-***Remove user (DELETE)***
-```bash
+# Remove User (DELETE)
+```powershell
 curl.exe -X DELETE http://localhost:4000/users/1
+```
+---
+# Developed by: Josh Efraim C. Padernal
+For INTPROG Lab 5 Activity
+
