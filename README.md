@@ -26,11 +26,16 @@ root/
 # 🚀 Getting Started
 # 1. Backend Setup (API)
 The backend handles data persistence, password hashing with bcryptjs, and JWT-based security.
-
 Install Dependencies:
+**Install runtime dependencies**
 ```bash
-npm install
+npm install express mysql2 sequelize bcryptjs jsonwebtoken cors joi rootpath
 ```
+** Install TypeScript + dev dependencies**
+```bash
+npm install --save-dev typescript ts-node @types/node @types/express @types/cors @types/bcryptjs @types/jsonwebtoken nodemon
+```
+
 # Database Configuration:
 Ensure your MySQL server is running and update config.json with your credentials.
 
@@ -65,7 +70,7 @@ Security: Industry-standard password hashing via bcryptjs and JWT authentication
 
 Global Error Handling: Custom middleware to format errors into consistent JSON responses.
 
-# 🧪 API Endpoint Testing (PowerShell)
+# 🧪 API Endpoint Testing (PowerShell) using cURL
 Account Management
 # Create Record (POST)
 ```powershell
