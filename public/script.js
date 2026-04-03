@@ -38,14 +38,19 @@ function checkAuth() {
     const user = JSON.parse(localStorage.getItem('user'));
     const body = document.body;
 
+    // Select the "Add User" button (You might need to give it an ID in HTML)
+    const addUserBtn = document.querySelector('[data-bs-target="#addUserModal"]');
+
     if (user) {
         body.classList.replace('not-authenticated', 'authenticated');
         document.getElementById('nav-name-display').innerText = user.firstname;
 
         if (user.role === 'Admin') {
             body.classList.add('is-admin');
+            if (addUserBtn) addUserBtn.style.display = 'block'; // Show if Admin
         } else {
             body.classList.remove('is-admin');
+            if (addUserBtn) addUserBtn.style.display = 'none'; // Hide if User
         }
     } else {
         body.classList.add('not-authenticated');
@@ -146,40 +151,48 @@ async function loadAccounts() {
     const tbody = document.getElementById('account-table-body');
     if (!tbody) return;
 
-    // Clear the table and show a loading state
+    // Get the current logged-in user to check their role
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+
     tbody.innerHTML = '<tr><td colspan="5" class="text-center">Loading users...</td></tr>';
 
     try {
         const response = await fetch(`${API_URL}/users`);
-
         if (!response.ok) throw new Error("Failed to fetch users");
 
         const users = await response.json();
 
-        // Map through the users and create table rows
-        tbody.innerHTML = users.map(u => `
-            <tr>
-                <td>${u.id}</td>
-                <td>
-                    <div class="fw-bold">${u.title}. ${u.lastname}</div>
-                    <small class="text-muted">${u.firstname}</small>
-                </td>
-                <td>${u.email}</td>
-                <td>
-                    <span class="badge ${u.role === 'Admin' ? 'bg-danger' : 'bg-primary'}">
-                        ${u.role}
-                    </span>
-                </td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditModal(${u.id})">
-                        <i class="bi bi-pencil"></i> Edit
-                    </button>
-                    <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${u.id})">
-                        <i class="bi bi-trash"></i> Delete
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+        tbody.innerHTML = users.map(u => {
+            // Determine if the current viewer is an Admin
+            const isAdmin = currentUser && currentUser.role === 'Admin';
+
+            // Only show buttons if the viewer is an Admin
+            const actionButtons = isAdmin ? `
+                <button class="btn btn-sm btn-outline-primary me-1" onclick="openEditModal(${u.id})">
+                    <i class="bi bi-pencil"></i> Edit
+                </button>
+                <button class="btn btn-sm btn-outline-danger" onclick="deleteUser(${u.id})">
+                    <i class="bi bi-trash"></i> Delete
+                </button>
+            ` : `<span class="text-muted small">View Only</span>`;
+
+            return `
+                <tr>
+                    <td>${u.id}</td>
+                    <td>
+                        <div class="fw-bold">${u.title}. ${u.lastname}</div>
+                        <small class="text-muted">${u.firstname}</small>
+                    </td>
+                    <td>${u.email}</td>
+                    <td>
+                        <span class="badge ${u.role === 'Admin' ? 'bg-danger' : 'bg-primary'}">
+                            ${u.role}
+                        </span>
+                    </td>
+                    <td class="text-center">${actionButtons}</td>
+                </tr>
+            `;
+        }).join('');
 
     } catch (err) {
         console.error("Load Accounts Error:", err);
@@ -247,7 +260,13 @@ async function addAccount(event) {
 
 // delete account using the typescript_crud_api
 async function deleteUser(id) {
-    // 1. Safety first - always ask before deleting from DB
+    const currentUser = JSON.parse(localStorage.getItem('user'));
+
+    // PROTECTION: Check if the ID to delete matches the current user's ID
+    if (currentUser && id === currentUser.id) {
+        return alert("Security Block: You cannot delete your own account while logged in!");
+    }
+
     if (!confirm(`Are you sure you want to delete User ID: ${id}?`)) return;
 
     try {
@@ -257,7 +276,7 @@ async function deleteUser(id) {
 
         if (response.ok) {
             alert("User removed from database.");
-            loadAccounts(); // <--- Refresh the table automatically
+            loadAccounts();
         } else {
             const err = await response.json();
             alert("Delete failed: " + err.message);
