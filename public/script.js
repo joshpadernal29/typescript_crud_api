@@ -26,7 +26,8 @@ function handleRouting() {
     if (hash === '#/employees') { targetId = 'employees'; /* loadEmployees(); */ }
     if (hash === '#/accounts') { targetId = 'accounts'; loadAccounts(); }
     if (hash === '#/userProfile') { targetId = 'profile'; loadProfile(); }
-    if (hash === '#/request') { targetId = 'requests'; /* loadRequests(); */ }
+    if (hash === '#/departments') { targetId = 'departments'; loadDepartments(); }
+    if (hash === '#/requests') { targetId = 'requests'; loadRequests(); }
 
     const targetPage = document.getElementById(targetId);
     if (targetPage) targetPage.classList.add('active');
@@ -381,4 +382,132 @@ async function saveUpdatedAccount(event) {
         console.error("Update Error:", e);
         alert("System Error: " + e.message);
     }
+}
+
+// --- 1. DEPARTMENTS CRUD ---
+
+async function loadDepartments() {
+    const tbody = document.getElementById('dept-table-body');
+    if (!tbody) {
+        console.error("Could not find table body element!");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_URL}/departments`);
+        const depts = await res.json();
+
+        console.log("Departments fetched:", depts); // <-- Look for this in F12 Console
+
+        if (depts.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-center">No Data</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = depts.map(d => `
+            <tr>
+                <td>${d.id}</td>
+                <td>${d.name}</td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-outline-primary" onclick="editDept(${d.id}, '${d.name}')">Edit</button>
+                    <button class="btn btn-sm btn-outline-danger" onclick="deleteDept(${d.id})">Delete</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (e) {
+        console.error("UI Load Error:", e);
+    }
+}
+// edit department
+function editDept(id, name) {
+    // 1. Set the values in the modal fields
+    document.getElementById('deptId').value = id;
+    document.getElementById('deptName').value = name;
+
+    // 2. Change the Modal Title to "Edit"
+    document.getElementById('deptModalLabel').innerText = 'Edit Department';
+
+    // 3. Trigger the modal to open
+    const modal = new bootstrap.Modal(document.getElementById('deptModal'));
+    modal.show();
+}
+
+async function saveDepartment(event) {
+    event.preventDefault();
+    const id = document.getElementById('deptId').value;
+    const name = document.getElementById('deptName').value;
+
+    const method = id ? 'PUT' : 'POST';
+    const url = id ? `${API_URL}/departments/${id}` : `${API_URL}/departments`;
+
+    const res = await fetch(url, {
+        method: method,
+        headers: { 'Content-Type': 'application/json' }, // REMOVED: Authorization
+        body: JSON.stringify({ name })
+    });
+
+    if (res.ok) {
+        bootstrap.Modal.getInstance(document.getElementById('deptModal')).hide();
+        document.getElementById('deptForm').reset();
+        document.getElementById('deptId').value = '';
+        loadDepartments();
+    } else {
+        const err = await res.json();
+        alert("Save failed: " + err.message);
+    }
+}
+
+// --- 2. REQUESTS (Approve/Disapprove Logic) ---
+
+async function loadRequests() {
+    const tbody = document.getElementById('request-table-body');
+    const user = JSON.parse(localStorage.getItem('user'));
+    if (!tbody) return;
+
+    try {
+        const res = await fetch(`${API_URL}/requests`, {
+            headers: { 'Authorization': `Bearer ${user.jwtToken}` }
+        });
+        const reqs = await res.json();
+
+        tbody.innerHTML = reqs.map(r => `
+            <tr>
+                <td>${r.userName || 'User'}</td>
+                <td>${r.subject}</td>
+                <td><span class="badge ${getStatusClass(r.status)}">${r.status}</span></td>
+                <td class="text-center">
+                    <button class="btn btn-sm btn-success" onclick="updateRequestStatus(${r.id}, 'Approved')">Approve</button>
+                    <button class="btn btn-sm btn-danger" onclick="updateRequestStatus(${r.id}, 'Disapproved')">Disapprove</button>
+                </td>
+            </tr>
+        `).join('');
+    } catch (e) { console.error(e); }
+}
+
+async function updateRequestStatus(id, newStatus) {
+    const user = JSON.parse(localStorage.getItem('user'));
+
+    try {
+        const res = await fetch(`${API_URL}/requests/${id}`, {
+            method: 'PUT', // or PATCH depending on your backend
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${user.jwtToken}`
+            },
+            body: JSON.stringify({ status: newStatus })
+        });
+
+        if (res.ok) {
+            loadRequests(); // Refresh the table
+        } else {
+            const err = await res.json();
+            alert("Error: " + err.message);
+        }
+    } catch (e) { console.error(e); }
+}
+
+function getStatusClass(status) {
+    if (status === 'Approved') return 'bg-success';
+    if (status === 'Disapproved') return 'bg-danger';
+    return 'bg-warning text-dark';
 }

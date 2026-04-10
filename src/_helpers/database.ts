@@ -5,6 +5,8 @@ import { Sequelize } from 'sequelize';
 
 export interface Database {
     user: any; // we'll type this properly after model is created
+    department: any;
+    request: any;
 }
 
 // impliment database from interface database
@@ -18,16 +20,22 @@ export async function initialize(): Promise<void> {
     await connection.query(`CREATE DATABASE IF NOT EXISTS \`${database}\`;`);
     await connection.end();
 
-    // connect to db with sequelize
     const sequelize = new Sequelize(database, user, password, { dialect: 'mysql' });
 
-    // initialize models
-    const { default: userModel } = await import('../users/user.model');
-    db.user = userModel(sequelize);
+    // Initialize models
+    db.user = (await import('../users/user.model')).default(sequelize);
+    db.department = (await import('../departments/department.model')).default(sequelize);
+    db.request = (await import('../requests/request.model')).default(sequelize);
 
-    // sync models with db
+    // Define Associations (Relationships)
+    // A User has many Requests
+    db.user.hasMany(db.request, { foreignKey: 'userId', onDelete: 'CASCADE' });
+    db.request.belongsTo(db.user, { foreignKey: 'userId' });
+
+    // A Request belongs to a Department (Optional, depending on your logic)
+    db.department.hasMany(db.request, { foreignKey: 'deptId' });
+    db.request.belongsTo(db.department, { foreignKey: 'deptId' });
+
     await sequelize.sync({ alter: true });
-
-    // check console
     console.log('db initialized and models synced!');
 }
