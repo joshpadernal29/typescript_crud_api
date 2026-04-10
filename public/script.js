@@ -457,57 +457,236 @@ async function saveDepartment(event) {
     }
 }
 
-// --- 2. REQUESTS (Approve/Disapprove Logic) ---
-
+//  REQUESTS (Approve/Disapprove Logic)
 async function loadRequests() {
-    const tbody = document.getElementById('request-table-body');
     const user = JSON.parse(localStorage.getItem('user'));
-    if (!tbody) return;
+    if (!user) return;
+
+    const isAdmin = user.role === 'Admin';
+    const theadRow = document.getElementById('request-thead-row');
+    const newRequestBtn = document.getElementById('new-request-btn');
+
+    // Hide "New Request" button for admins if they don't need to make requests
+    if (newRequestBtn) newRequestBtn.style.display = isAdmin ? 'none' : 'block';
 
     try {
-        const res = await fetch(`${API_URL}/requests`, {
-            headers: { 'Authorization': `Bearer ${user.jwtToken}` }
-        });
-        const reqs = await res.json();
+        const res = await fetch(`${API_URL}/requests`);
+        const allReqs = await res.json();
 
-        tbody.innerHTML = reqs.map(r => `
-            <tr>
-                <td>${r.userName || 'User'}</td>
-                <td>${r.subject}</td>
-                <td><span class="badge ${getStatusClass(r.status)}">${r.status}</span></td>
-                <td class="text-center">
-                    <button class="btn btn-sm btn-success" onclick="updateRequestStatus(${r.id}, 'Approved')">Approve</button>
-                    <button class="btn btn-sm btn-danger" onclick="updateRequestStatus(${r.id}, 'Disapproved')">Disapprove</button>
-                </td>
-            </tr>
-        `).join('');
-    } catch (e) { console.error(e); }
+        if (isAdmin) {
+            // Set Admin Headers
+            if (isAdmin) {
+                theadRow.innerHTML = `
+                    <th>Account</th>
+                    <th>Type</th>
+                    <th>Items</th>
+                    <th>Status</th>
+                    <th class="text-center">Actions</th>
+                `;
+                renderAdminTable(allReqs);
+            }
+            renderAdminTable(allReqs);
+        } else {
+            // Set User Headers
+            theadRow.innerHTML = `
+                <th>Type</th>
+                <th>Items</th>
+                <th>Status</th>
+            `;
+            const myReqs = allReqs.filter(r => Number(r.userId) === Number(user.id));
+            renderUserTable(myReqs);
+        }
+    } catch (e) {
+        console.error("Load Requests Error:", e);
+    }
 }
 
-async function updateRequestStatus(id, newStatus) {
-    const user = JSON.parse(localStorage.getItem('user'));
+// TABLE RENDERING
+// Helper to format the items column safely
+function formatRequestItems(items) {
+    if (!items || items === "" || items === "[]") return '<span class="text-muted">No items</span>';
 
+    let itemsArray = items;
+    if (typeof items === 'string') {
+        try {
+            itemsArray = JSON.parse(items);
+        } catch (e) {
+            return items; // Return as plain text if JSON parse fails
+        }
+    }
+
+    if (Array.isArray(itemsArray)) {
+        return itemsArray.map(item => `${item.name} (${item.quantity})`).join(', ');
+    }
+    return items;
+}
+
+function renderAdminTable(reqs) {
+    const tbody = document.getElementById('request-table-body');
+    if (!tbody) return;
+
+    tbody.innerHTML = reqs.map(r => {
+        const fullName = r.user ? `${r.user.firstname} ${r.user.lastname}` : 'Unknown';
+        const email = r.user ? r.user.email : 'N/A';
+
+        // CHECK: If the status is no longer 'Pending', disable the buttons
+        const isProcessed = r.status === 'Approved' || r.status === 'Disapproved';
+
+        return `
+            <tr>
+                <td>
+                    <div class="fw-bold text-dark">${fullName}</div>
+                    <div class="small text-muted">${email}</div>
+                </td>
+                <td class="text-capitalize">${r.type}</td>
+                <td>${formatRequestItems(r.items)}</td>
+                <td><span class="badge ${getStatusClass(r.status)}">${r.status || 'Pending'}</span></td>
+                <td class="text-center">
+                    <div class="btn-group btn-group-sm">
+                        <button class="btn btn-success" 
+                            onclick="updateRequestStatus(${r.id}, 'Approved')" 
+                            ${isProcessed ? 'disabled' : ''}>
+                            Approve
+                        </button>
+                        <button class="btn btn-danger" 
+                            onclick="updateRequestStatus(${r.id}, 'Disapproved')" 
+                            ${isProcessed ? 'disabled' : ''}>
+                            Reject
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function renderUserTable(reqs) {
+    const tbody = document.getElementById('request-table-body');
+
+    if (!tbody) return;
+
+    if (reqs.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="3" class="text-center text-muted">No requests found.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = reqs.map(r => `
+        <tr>
+            <td class="text-capitalize">${r.type}</td>
+            
+            <td>${formatRequestItems(r.items)}</td>
+            
+            <td>
+                <span class="badge ${getStatusClass(r.status)}">
+                    ${r.status || 'Pending'}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// DYNAMIC FORM & SUBMISSION
+function addRequestItemRow() {
+    const container = document.getElementById('dynamic-items-container');
+    const rowId = Date.now();
+
+    const html = `
+        <div class="row g-2 mb-2 align-items-center" id="row-${rowId}">
+            <div class="col-7">
+                <input type="text" class="form-control item-name" placeholder="Item name" required>
+            </div>
+            <div class="col-3">
+                <input type="number" class="form-control item-qty" placeholder="Qty" min="1" value="1" required>
+            </div>
+            <div class="col-2 text-end">
+                <button class="btn btn-outline-danger w-100" type="button" onclick="this.closest('.row').remove()">
+                    &times;
+                </button>
+            </div>
+        </div>
+    `;
+    container.insertAdjacentHTML('beforeend', html);
+}
+
+const requestForm = document.getElementById('requestForm');
+if (requestForm) {
+    requestForm.onsubmit = async (e) => {
+        e.preventDefault();
+
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (!user) return alert("Please log in first");
+
+        // GATHER DATA FROM DYNAMIC ROWS
+        const items = [];
+        const names = document.querySelectorAll('.item-name');
+        const qtys = document.querySelectorAll('.item-qty');
+
+        names.forEach((nameInput, index) => {
+            if (nameInput.value.trim() !== "") {
+                items.push({
+                    name: nameInput.value,
+                    quantity: qtys[index].value
+                });
+            }
+        });
+
+        const payload = {
+            type: document.getElementById('requestType').value,
+            items: JSON.stringify(items), // Send as Stringified JSON
+            userId: user.id
+        };
+
+        try {
+            const res = await fetch(`${API_URL}/requests`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                const modalEl = document.getElementById('request-modal');
+                const modalInstance = bootstrap.Modal.getInstance(modalEl);
+                if (modalInstance) modalInstance.hide();
+
+                requestForm.reset();
+                document.getElementById('dynamic-items-container').innerHTML = ''; // Clear items
+                loadRequests();
+                alert("Request submitted successfully!");
+            } else {
+                const err = await res.json();
+                alert("Submission failed: " + err.message);
+            }
+        } catch (err) {
+            console.error("Network Error:", err);
+        }
+    };
+}
+
+// UTILITIES
+async function updateRequestStatus(id, newStatus) {
     try {
-        const res = await fetch(`${API_URL}/requests/${id}`, {
-            method: 'PUT', // or PATCH depending on your backend
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${user.jwtToken}`
-            },
+        const res = await fetch(`${API_URL}/requests/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ status: newStatus })
         });
 
         if (res.ok) {
-            loadRequests(); // Refresh the table
+            loadRequests();
         } else {
-            const err = await res.json();
-            alert("Error: " + err.message);
+            const errorData = await res.json();
+            alert("Error updating status: " + errorData.message);
         }
-    } catch (e) { console.error(e); }
+    } catch (err) {
+        console.error("Update Status Error:", err);
+    }
 }
 
 function getStatusClass(status) {
-    if (status === 'Approved') return 'bg-success';
-    if (status === 'Disapproved') return 'bg-danger';
-    return 'bg-warning text-dark';
+    switch (status) {
+        case 'Approved': return 'bg-success';
+        case 'Disapproved': return 'bg-danger';
+        default: return 'bg-warning text-dark';
+    }
 }
+

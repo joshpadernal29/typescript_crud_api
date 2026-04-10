@@ -29,13 +29,13 @@ export async function initialize(): Promise<void> {
 
     // Define Associations (Relationships)
     // A User has many Requests
-    db.user.hasMany(db.request, { foreignKey: 'userId', onDelete: 'CASCADE' });
-    db.request.belongsTo(db.user, { foreignKey: 'userId' });
+    db.user.hasMany(db.request, { foreignKey: 'userId', onDelete: 'CASCADE', as: 'requests' });
+    db.request.belongsTo(db.user, { foreignKey: 'userId', as: 'user' });
 
-    // A Request belongs to a Department (Optional, depending on your logic)
-    db.department.hasMany(db.request, { foreignKey: 'deptId' });
-    db.request.belongsTo(db.department, { foreignKey: 'deptId' });
+    // A Request belongs to a Department
+    db.department.hasMany(db.request, { foreignKey: 'deptId', as: 'requests' });
+    db.request.belongsTo(db.department, { foreignKey: 'deptId', as: 'department' });
 
-    await sequelize.sync({ alter: true });
+    await sequelize.sync();
     console.log('db initialized and models synced!');
 }

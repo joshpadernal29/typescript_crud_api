@@ -4,6 +4,8 @@ import cors from 'cors';
 import { errorHandler } from './_middleware/errorHandler';
 import { initialize } from './_helpers/database';
 import userController from './users/users.controller';
+import departmentController from './departments/department.controller';
+import requestController from './requests/request.controller';
 
 const app: Application = express();
 
@@ -14,6 +16,8 @@ app.use(cors());
 
 // Api Routes (refer to the users.controller.ts for routing /users)
 app.use('/users', userController);
+app.use('/departments', departmentController);
+app.use('/requests', requestController);
 
 // global errorhandler
 app.use(errorHandler);
